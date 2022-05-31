@@ -180,6 +180,31 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       await device.prepare();
     }
   }
+
+  @override
+  Future<void> syncDebugSymbols() async {
+    if (!await xcodeIsInstalled()) {
+      throw StateError(
+        'Xcode is not installed (cannot run $kXcodeBuildPath); this command '
+        'must be run with Xcode installed.',
+      );
+    }
+  }
+
+  static const String kXcodeBuildPath = '/usr/bin/xcodebuild';
+
+  @visibleForTesting
+  Future<bool> xcodeIsInstalled({
+    ProcessManager processManager = const LocalProcessManager(),
+  }) async {
+    if (!processManager.canRun(kXcodeBuildPath)) {
+      return false;
+    }
+    final ProcessResult result = processManager.runSync(
+      <String>[kXcodeBuildPath, '-version'],
+    );
+    return result.exitCode == 0;
+  }
 }
 
 /// iOS device.

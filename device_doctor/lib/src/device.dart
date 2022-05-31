@@ -38,6 +38,11 @@ abstract class DeviceDiscovery {
   /// Recovers the device.
   Future<void> recoverDevices();
 
+  /// Sync debug symbols from device to host.
+  ///
+  /// Only implemented for macOS/iOS, and requires Xcode to be installed.
+  Future<void> syncDebugSymbols();
+
   /// Prepares the device.
   Future<void> prepareDevices();
 }

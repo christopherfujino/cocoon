@@ -350,6 +350,13 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       await device.prepare();
     }
   }
+
+  @override
+  Future<void> syncDebugSymbols() {
+    throw UnimplementedError(
+      'The "sync-debug-symbols" action is only supported on macOS/iOS.',
+    );
+  }
 }
 
 class AndroidDevice implements Device {
