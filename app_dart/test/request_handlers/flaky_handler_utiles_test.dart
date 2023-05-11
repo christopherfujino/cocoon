@@ -13,6 +13,27 @@ import '../src/datastore/fake_config.dart';
 import '../src/utilities/mocks.dart';
 
 void main() {
+  group('issueBuildLinks', () {
+    test('sorts builds in numeric order', () {
+      const String builderName = 'Linux analyze';
+      // note, in alphanumeric order
+      const List<String> builds = <String>[
+        '10',
+        '7',
+        '8',
+        '9',
+      ];
+      final String result = issueBuildLinks(
+        builder: builderName,
+        builds: builds,
+      );
+      expect(result, '''
+https://ci.chromium.org/ui/p/flutter/builders/prod/Linux%20analyze/7
+https://ci.chromium.org/ui/p/flutter/builders/prod/Linux%20analyze/8
+https://ci.chromium.org/ui/p/flutter/builders/prod/Linux%20analyze/9
+https://ci.chromium.org/ui/p/flutter/builders/prod/Linux%20analyze/10''');
+    });
+  });
   group('Gets test ownership', () {
     String testOwnersContent;
 

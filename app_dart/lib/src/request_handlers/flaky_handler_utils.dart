@@ -8,6 +8,7 @@ import 'dart:core';
 import 'package:cocoon_service/ci_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:github/github.dart';
+import 'package:meta/meta.dart';
 
 import '../service/bigquery.dart';
 import '../service/github_service.dart';
@@ -97,7 +98,7 @@ One recent flaky example for a same commit: ${_issueBuildLink(builder: statistic
 Commit: $_commitPrefix${statistic.recentCommit}
 
 Flaky builds:
-${_issueBuildLinks(builder: statistic.name, builds: statistic.flakyBuilds!, bucket: buildBucket)}
+${issueBuildLinks(builder: statistic.name, builds: statistic.flakyBuilds!, bucket: buildBucket)}
 
 Recent test runs:
 ${_issueBuilderLink(statistic.name)}
@@ -161,7 +162,7 @@ class IssueUpdateBuilder {
 One recent flaky example for a same commit: ${_issueBuildLink(builder: statistic.name, build: statistic.flakyBuildOfRecentCommit, bucket: bucket)}
 Commit: $_commitPrefix${statistic.recentCommit}
 Flaky builds:
-${_issueBuildLinks(builder: statistic.name, builds: statistic.flakyBuilds!, bucket: bucket)}
+${issueBuildLinks(builder: statistic.name, builds: statistic.flakyBuilds!, bucket: bucket)}
 
 Recent test runs:
 ${_issueBuilderLink(statistic.name)}
@@ -508,8 +509,20 @@ Map<String, dynamic>? retrieveMetaTagsFromContent(String content) {
 
 String _formatRate(double rate) => (rate * 100).toStringAsFixed(2);
 
-String _issueBuildLinks({String? builder, required List<String> builds, Bucket bucket = Bucket.prod}) {
-  return builds.map((String build) => _issueBuildLink(builder: builder, build: build, bucket: bucket)).join('\n');
+@visibleForTesting
+String issueBuildLinks({String? builder, required List<String> builds, Bucket bucket = Bucket.prod}) {
+  return builds
+      .map((String build) => _issueBuildLink(builder: builder, build: build, bucket: bucket))
+      .sorted((String a, String b) {
+        final int? aInt = int.tryParse(a);
+        final int? bInt = int.tryParse(b);
+        if (aInt == null || bInt == null) {
+          // don't know how to compare, just call them equal.
+          return 0;
+        }
+        return aInt - bInt;
+      })
+      .join('\n');
 }
 
 String _issueSummary(BuilderStatistic statistic, double threshold, bool bringup) {
